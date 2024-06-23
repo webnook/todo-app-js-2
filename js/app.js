@@ -5,6 +5,7 @@ const editButton = document.getElementById("edit-button");
 const alertMessage = document.getElementById("alert-message");
 const todoBody = document.querySelector("tbody");
 const deleteAllButton = document.getElementById("delete-all-btn");
+const filterButtons = document.querySelectorAll(".filter-todo");
 
 let todos = JSON.parse(localStorage.getItem("todos")) || [];
 
@@ -24,13 +25,14 @@ const saveToLocalStorage = () => {
   localStorage.setItem("todos", JSON.stringify(todos));
 };
 
-const displayTodos = () => {
+const displayTodos = (data) => {
+  const todoList = data || todos;
   todoBody.innerHTML = "";
-  if (!todos.length) {
+  if (!todoList.length) {
     todoBody.innerHTML = "<tr><td colspan='4'>No Task Found!</td></tr>";
     return;
   }
-  todos.forEach((todo) => {
+  todoList.forEach((todo) => {
     todoBody.innerHTML += `<tr>
             <td>${todo.task}</td>
             <td>${todo.date || "No Date"}</td>
@@ -115,7 +117,28 @@ const applyEditHandler = (e) => {
   showAlert("Todo edited successfully", "success");
 };
 
-window.addEventListener("load", displayTodos);
+const filterHandler = (e) => {
+  let filteredTodos = null;
+  const filter = e.target.dataset.filter;
+  switch (filter) {
+    case "pending":
+      filteredTodos = todos.filter((todo) => todo.completed === false);
+      break;
+
+    case "completed":
+      filteredTodos = todos.filter((todo) => todo.completed === true);
+      break;
+
+    default:
+      filteredTodos = todos;
+  }
+  displayTodos(filteredTodos);
+};
+
+window.addEventListener("load", () => displayTodos());
 addButton.addEventListener("click", addHandler);
 deleteAllButton.addEventListener("click", deleteAllHandler);
 editButton.addEventListener("click", applyEditHandler);
+filterButtons.forEach((button) => {
+  button.addEventListener("click", filterHandler);
+});
